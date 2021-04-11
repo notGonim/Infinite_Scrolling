@@ -1,30 +1,43 @@
 import React, { useEffect } from 'react'
 import axios from 'axios'
 import { useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { Post } from './Post';
+
+
 
 export const UseBookSearch = () => {
 
-    const [query, setQuery] = useState('')
-    const [pageNumber, setPageNumber] = useState(1)
+    const [posts, setPosts] = useState([])
+    const [loaded, setLoaded] = useState(false)
 
-
-    const handleData = (e) => {
-        setQuery(e.target.value)
-        setPageNumber(1)
-
-    }
 
 
     useEffect(async () => {
-        const data = await axios.get(`https://jsonplaceholder.typicode.com/posts/${query}`)
-        console.log(data)
-    })
+        const { data } = await axios.get('https://jsonplaceholder.typicode.com/posts')
+        setPosts([...data])
+        setLoaded(true)
+
+    }, [posts])
     return (
         <>
-            <input type="text" value={query} onChange={handleData} />
-            <div className="">Title</div>
-            <div className="">Loading...</div>
-            <div className="">Error </div>
+            {loaded &&
+                <div                >
+                    <InfiniteScroll
+                        dataLength={posts.length}
+                        loader={<h4>Loading...</h4>}
+                        endMessage={
+                            <p style={{ textAlign: 'center' }}>
+                                <b>Yay! You have seen it all</b>
+                            </p>
+                        }>
+                            { posts.map(post => <Post p={post.title} key={post.id} id={post.id} />) }
+                    </InfiniteScroll>
+                </div>
+
+
+
+            }
         </>
     )
 }
